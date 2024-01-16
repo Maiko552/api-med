@@ -36,7 +36,7 @@ public class MedicoController {
     @GetMapping
     //@PagebleDefault(size = 10, sort = {"nome"}) caso nao for informada a ordenação na url do postman
     public Page<DadosListagemMedico> listar(@PageableDefault(size = 10, sort = {"id"}) Pageable paginacao){ //pageable para paginar a listagem, classe do Spring
-        return repository.findAll(paginacao).map(DadosListagemMedico::new);
+        return repository.findAllByAtivoTrue(paginacao).map(DadosListagemMedico::new);
     }
 
 
@@ -51,8 +51,8 @@ public class MedicoController {
     @DeleteMapping("/{id}")
     @Transactional
     public void excluir(@PathVariable Long id){
-        repository.deleteById(id);
-
+        var medico = repository.getReferenceById(id);
+        medico.excluir();
     }
 
 }
