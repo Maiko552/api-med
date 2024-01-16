@@ -2,10 +2,7 @@ package med.mkn.api.controller;
 
 import jakarta.validation.Valid;
 import lombok.Getter;
-import med.mkn.api.medico.DadosCadastroMedico;
-import med.mkn.api.medico.DadosListagemMedico;
-import med.mkn.api.medico.Medico;
-import med.mkn.api.medico.MedicoRepository;
+import med.mkn.api.medico.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,8 +35,16 @@ public class MedicoController {
 
     @GetMapping
     //@PagebleDefault(size = 10, sort = {"nome"}) caso nao for informada a ordenação na url do postman
-    public Page<DadosListagemMedico> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){ //pageable para paginar a listagem, classe do Spring
+    public Page<DadosListagemMedico> listar(@PageableDefault(size = 10, sort = {"id"}) Pageable paginacao){ //pageable para paginar a listagem, classe do Spring
         return repository.findAll(paginacao).map(DadosListagemMedico::new);
+    }
+
+
+    @PutMapping
+    @Transactional
+    public void atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados){
+        var medico = repository.getReferenceById(dados.id());// carregando o medico pelo id no DTO
+        medico.atualizarInformacoes(dados);
     }
 
 }
