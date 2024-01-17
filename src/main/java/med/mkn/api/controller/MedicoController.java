@@ -1,12 +1,12 @@
 package med.mkn.api.controller;
 
 import jakarta.validation.Valid;
-import lombok.Getter;
 import med.mkn.api.medico.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,24 +35,30 @@ public class MedicoController {
 
     @GetMapping
     //@PagebleDefault(size = 10, sort = {"nome"}) caso nao for informada a ordenação na url do postman
-    public Page<DadosListagemMedico> listar(@PageableDefault(size = 10, sort = {"id"}) Pageable paginacao){ //pageable para paginar a listagem, classe do Spring
-        return repository.findAllByAtivoTrue(paginacao).map(DadosListagemMedico::new);
+    public ResponseEntity<Page<DadosListagemMedico>> listar(@PageableDefault(size = 10, sort = {"id"}) Pageable paginacao){ //pageable para paginar a listagem, classe do Spring
+        var page = repository.findAllByAtivoTrue(paginacao).map(DadosListagemMedico::new);
+        return ResponseEntity.ok(page); //Receber o código 200 Ok
     }
 
 
     @PutMapping
     @Transactional
-    public void atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados){
+    public ResponseEntity atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados){
         var medico = repository.getReferenceById(dados.id());// carregando o medico pelo id no DTO
         medico.atualizarInformacoes(dados);
+        return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
 
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void excluir(@PathVariable Long id){
+    public ResponseEntity excluir(@PathVariable Long id){
         var medico = repository.getReferenceById(id);
         medico.excluir();
+
+        return ResponseEntity.noContent().build(); //ResponseEntity classe do pacote org.springframework.http
+        //noContent() ele nao devolve nenhum conteudo e cria o objeto. O build constroi o objeto ResponseEntity
+        //No Postman o retorno vai ser (204 No Content) no lugar de (200 OK), BOA PRATICA
     }
 
 }
